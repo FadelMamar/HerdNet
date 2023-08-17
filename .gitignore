@@ -12,7 +12,8 @@ handling/
 tests/
 scripts/
 *.code-workspace
-
+data/
+*.JPG
 configs/train/*
 configs/test/*
 !configs/*/faster_rcnn.yaml
