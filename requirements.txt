@@ -1,0 +1,14 @@
+albumentations
+fiftyone
+hydra-core
+opencv-python
+pandas
+pillow
+scikit-image
+scikit-learn
+scipy
+wandb
+torch
+torchvision
+boto3
+sagemaker
