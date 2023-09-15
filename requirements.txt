@@ -12,3 +12,5 @@ torch
 torchvision
 boto3
 sagemaker
+rasterio
+tqdm
