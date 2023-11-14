@@ -19,3 +19,5 @@ configs/test/*
 !configs/*/faster_rcnn.yaml
 !configs/*/dla34.yaml
 !configs/*/herdnet.yaml
+wandb
+runs
