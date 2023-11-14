@@ -21,5 +21,4 @@ configs/test/*
 !configs/*/herdnet.yaml
 wandb
 runs
-yolov8n.pt
-yolov8s.pt
+*pt
