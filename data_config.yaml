@@ -1,6 +1,6 @@
 # Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
 path: /home/ubuntu/workspace/wildlife_localizer_data  # dataset root dir
-train: ../savmap_dataset_v2/train/images  # train images (relative to 'path')
+train: [../savmap_dataset_v2/train/images, train/images]  # train images (relative to 'path')
 val :  val/images
 # test:  # test images (optional)
 
