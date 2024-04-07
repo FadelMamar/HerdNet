@@ -21,6 +21,7 @@ import PIL
 import torchvision
 import numpy
 import cv2
+from pathlib import Path
 
 from albumentations import PadIfNeeded
 
@@ -46,12 +47,14 @@ parser.add_argument('-min', type=float, default=0.1,
     help='minimum fraction of area for an annotation to be kept (float). Defautls to 0.1')
 parser.add_argument('-all', type=bool, default=False,
     help='set to True to save all patches, not only those containing annotations (bool). Defaults to False')
+parser.add_argument('-pattern',type=str,default='**/*.jpg',
+                    help='pattern of files extension')
 
 args = parser.parse_args()
 
 def main():
 
-    images_paths = [os.path.join(args.root, p) for p in os.listdir(args.root) if not p.endswith('.csv')]
+    images_paths =list(Path(args.root).glob(args.pattern))  #[os.path.join(args.root, p) for p in os.listdir(args.root) if not p.endswith('.csv')]
 
     if args.csv is not None:
         patches_buffer = PatchesBuffer(args.csv, args.root, (args.height, args.width), overlap=args.overlap, min_visibility=args.min).buffer
