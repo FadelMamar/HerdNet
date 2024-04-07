@@ -16,3 +16,4 @@ rasterio
 tqdm
 ultralytics
 geopandas
+sahi
