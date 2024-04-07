@@ -5,3 +5,4 @@ call conda activate label-backend
 label-studio-ml start HerdNet/my_ml_backend -p 9090
 
 :: deactivate
+call "C:\Users\Machine Learning\Desktop\workspace-wildAI\envs\label-studio\Scripts\deactivate.bat"
