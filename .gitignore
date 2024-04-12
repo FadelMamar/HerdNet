@@ -25,3 +25,6 @@ runs
 nohup.out
 yolo-runs
 tmp
+cache.db
+template_annotations.json
+template_preannotations.json
