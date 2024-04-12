@@ -22,6 +22,7 @@ import torchvision
 import numpy
 import cv2
 from pathlib import Path
+import math
 
 from albumentations import PadIfNeeded
 
@@ -34,12 +35,18 @@ parser = argparse.ArgumentParser(prog='patcher', description='Cut images into pa
 parser.add_argument('root', type=str,
     help='path to the images directory (str)')
 parser.add_argument('height', type=int,
-    help='height of the patches, in pixels (int)')
+    help='height of the patches, in pixels (int)'
+    )
 parser.add_argument('width', type=int,
-    help='width of the patches, in pixels (int)')
+    help='width of the patches, in pixels (int)'
+    )
 parser.add_argument('overlap', type=int,
     help='overlap between patches, in pixels (int)')
-parser.add_argument('dest', type=str,
+parser.add_argument('-ratioheight',type=float,default=1.0,
+                    help='ratios for height. When it is not 1.0 then the height of the tile is infered from the image height and the ratio.')
+parser.add_argument('-ratiowidth',type=float,default=1.0,
+                    help='ratios for width. When it is not 1.0 then the width of the tile is infered from the image width and the ratio.')
+parser.add_argument('-dest', type=str,
     help='destination path (str)')
 parser.add_argument('-csv', type=str,
     help='path to a csv file containing annotations (str). Defaults to None')
@@ -64,6 +71,16 @@ def main():
         pil_img = PIL.Image.open(img_path)
         img_tensor = torchvision.transforms.ToTensor()(pil_img)
         img_name = os.path.basename(img_path)
+
+        assert (args.ratiowidth<=1.0) and (args.ratioheight<=1.0), "The ratios should be at most 1.0"
+
+        # computes tile width and height using the given ratios
+        # IT overrides the parameters 'width' and 'height'
+        if args.ratiowidth < 1.0:
+            args.width = math.ceil(img_tensor.shape[2]*args.ratiowidth)
+        if args.ratioheight < 1.0:
+            args.height = math.ceil(img_tensor.shape[1]*args.ratioheight)
+
 
         if args.csv is not None:
             # save all patches
