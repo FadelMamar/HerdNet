@@ -56,30 +56,60 @@ parser.add_argument('-all', type=bool, default=False,
     help='set to True to save all patches, not only those containing annotations (bool). Defaults to False')
 parser.add_argument('-pattern',type=str,default='**/*.jpg',
                     help='pattern of files extension')
+parser.add_argument('-rmheight',type=float,default=0.0,
+                    help='height overlap to be removed at both bottom and top')
+parser.add_argument('-rmwidth',type=float,default=0.0,
+                    help='width overlap to be removed at both left and right sides')
+
 
 args = parser.parse_args()
 
 def main():
 
-    images_paths =list(Path(args.root).glob(args.pattern))  #[os.path.join(args.root, p) for p in os.listdir(args.root) if not p.endswith('.csv')]
+    # images_paths =list(Path(args.root).glob(args.pattern))  #[os.path.join(args.root, p) for p in os.listdir(args.root) if not p.endswith('.csv')]
+    images_paths = [p for p in Path(args.root).glob(args.pattern)]
 
     if args.csv is not None:
         patches_buffer = PatchesBuffer(args.csv, args.root, (args.height, args.width), overlap=args.overlap, min_visibility=args.min).buffer
         patches_buffer.drop(columns='limits').to_csv(os.path.join(args.dest, 'gt.csv'), index=False)
 
     for img_path in tqdm(images_paths, desc='Exporting patches'):
-        pil_img = PIL.Image.open(img_path)
+        try:
+            pil_img = PIL.Image.open(img_path)
+        except :
+            print("failed for: ",img_path,flush=True)
+            continue
         img_tensor = torchvision.transforms.ToTensor()(pil_img)
         img_name = os.path.basename(img_path)
 
-        assert (args.ratiowidth<=1.0) and (args.ratioheight<=1.0), "The ratios should be at most 1.0"
+        # print('\nOriginal tensor shape: ', img_tensor.shape)
 
+        # Remove overlaps in data 
+        height_overlap = math.ceil(args.rmheight * img_tensor.shape[1])
+        width_overlap = math.ceil(args.rmwidth * img_tensor.shape[2])
+
+        # print('Overlapped area, height and width: ', height_overlap, width_overlap)
+
+        if height_overlap*width_overlap > 0 :
+            img_tensor = img_tensor[:,height_overlap:-height_overlap, width_overlap:-width_overlap]
+            print(f"Removing {2*width_overlap} pixels to the width; and {2*height_overlap} pixels to the height.")
+        elif (height_overlap == 0) and (width_overlap != 0):
+            img_tensor = img_tensor[:,:, width_overlap:-width_overlap]
+        elif width_overlap == 0 and (height_overlap != 0):
+            img_tensor = img_tensor[:,height_overlap:-height_overlap,:]
+        
+        # print("Cropped tensor shape: ", img_tensor.shape)
+
+        assert (args.ratiowidth<=1.0) and (args.ratioheight<=1.0), "The ratios should be at most 1.0"
         # computes tile width and height using the given ratios
-        # IT overrides the parameters 'width' and 'height'
+        # It overrides the parameters 'width' and 'height'
         if args.ratiowidth < 1.0:
             args.width = math.ceil(img_tensor.shape[2]*args.ratiowidth)
         if args.ratioheight < 1.0:
             args.height = math.ceil(img_tensor.shape[1]*args.ratioheight)
+        
+        # print("Tile height and width",args.height,args.width)
+        # exit()
 
 
         if args.csv is not None:
