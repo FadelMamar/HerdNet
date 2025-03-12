@@ -202,7 +202,19 @@ class Evaluator:
 
             output = self.prepare_feeding(targets, output)
 
-            iter_metrics.feed(**output)
+            batchsize = images.shape[0]
+            if batchsize>1:
+                for i in range(batchsize):
+                    gt = {k:v[i] for k,v in output['gt'].items()}
+                    preds = {k:v[i] for k,v in output['preds'].items()}
+                    counts = output['est_count'][i]
+                    output_i = dict(gt = gt, preds = preds, est_count = counts)
+                    iter_metrics.feed(**output_i)
+            else:
+                output['preds'] = {k:v[0] for k,v in output['preds'].items()}
+                output['est_count'] = output['est_count'][0]
+                iter_metrics.feed(**output)
+            
             iter_metrics.aggregate()
             if log_meters:
                 logger.add_meter('n', sum(iter_metrics.tp) + sum(iter_metrics.fn))
@@ -346,8 +358,12 @@ class HerdNetEvaluator(Evaluator):
 
     def prepare_feeding(self, targets: Dict[str, torch.Tensor], output: List[torch.Tensor]) -> dict:
 
-        gt_coords = [p[::-1] for p in targets['points'].squeeze(0).tolist()]
-        gt_labels = targets['labels'].squeeze(0).tolist()
+        try: # batchsize==1
+            gt_coords = [p[::-1] for p in targets['points'].cpu().tolist()]
+            gt_labels = targets['labels'].cpu().tolist()
+        except Exception as e: # batchsize>1
+            gt_coords = [p[::-1] for p in targets['points']]
+            gt_labels = targets['labels']
         
         gt = dict(
             loc = gt_coords,
@@ -361,11 +377,17 @@ class HerdNetEvaluator(Evaluator):
         lmds = HerdNetLMDS(up=up, **self.lmds_kwargs)
         counts, locs, labels, scores, dscores = lmds(output)
         
+        # preds = dict(
+        #     loc = locs[0],
+        #     labels = labels[0],
+        #     scores = scores[0],
+        #     dscores = dscores[0]
+        # )
         preds = dict(
-            loc = locs[0],
-            labels = labels[0],
-            scores = scores[0],
-            dscores = dscores[0]
+            loc = locs,
+            labels = labels,
+            scores = scores,
+            dscores = dscores
         )
         
         return dict(gt = gt, preds = preds, est_count = counts[0])
