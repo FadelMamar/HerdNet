@@ -22,16 +22,13 @@ import os
 import wandb
 import matplotlib
 
-import matplotlib.pyplot as plt
 matplotlib.use('Agg')
-from torchvision.transforms import ToPILImage
 
 from typing import List, Optional, Union, Callable, Any
 
 from ..utils.torchvision_utils import SmoothedValue, reduce_dict
 from ..utils.logger import CustomLogger
 from ..eval.evaluators import Evaluator
-from ..data.transforms import UnNormalize
 from .adaloss import Adaloss
 
 from ..utils.registry import Registry

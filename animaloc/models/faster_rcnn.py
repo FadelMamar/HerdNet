@@ -90,7 +90,7 @@ class RoiHeadsWeightedLoss(RoIHeads):
         if targets is not None:
             for t in targets:
                 floating_point_types = (torch.float, torch.double, torch.half)
-                if not t["boxes"].dtype in floating_point_types:
+                if t["boxes"].dtype not in floating_point_types:
                     raise TypeError(f"target boxes must of float type, instead got {t['boxes'].dtype}")
                 if not t["labels"].dtype == torch.int64:
                     raise TypeError("target labels must of int64 type, instead got {t['labels'].dtype}")

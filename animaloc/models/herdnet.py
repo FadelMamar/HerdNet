@@ -19,7 +19,6 @@ import torch
 
 import torch.nn as nn
 import numpy as np
-import torchvision.transforms as T
 
 from typing import Optional
 

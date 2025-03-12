@@ -176,6 +176,19 @@ class Evaluator:
         Returns:
             float
         '''
+
+        def batch_metrics(metric:Metrics,batchsize:int,output:dict):
+            if batchsize>1:
+                for i in range(batchsize):
+                    gt = {k:v[i] for k,v in output['gt'].items()}
+                    preds = {k:v[i] for k,v in output['preds'].items()}
+                    counts = output['est_count'][i]
+                    output_i = dict(gt = gt, preds = preds, est_count = counts)
+                    metric.feed(**output_i)
+            else:
+                output['preds'] = {k:v[0] for k,v in output['preds'].items()}
+                output['est_count'] = output['est_count'][0]
+                metric.feed(**output)
         
         self.model.eval()
 
@@ -203,17 +216,9 @@ class Evaluator:
             output = self.prepare_feeding(targets, output)
             
             batchsize = images.shape[0]
-            if batchsize>1:
-                for i in range(batchsize):
-                    gt = {k:v[i] for k,v in output['gt'].items()}
-                    preds = {k:v[i] for k,v in output['preds'].items()}
-                    counts = output['est_count'][i]
-                    output_i = dict(gt = gt, preds = preds, est_count = counts)
-                    iter_metrics.feed(**output_i)
-            else:
-                output['preds'] = {k:v[0] for k,v in output['preds'].items()}
-                output['est_count'] = output['est_count'][0]
-                iter_metrics.feed(**output)
+
+            batch_metrics(iter_metrics,batchsize,output)
+            # iter_metrics.feed(**output)
                 
             iter_metrics.aggregate()
             if log_meters:
@@ -238,17 +243,8 @@ class Evaluator:
 
             iter_metrics.flush()
 
-            if batchsize>1:
-                for i in range(batchsize):
-                    gt = {k:v[i] for k,v in output['gt'].items()}
-                    preds = {k:v[i] for k,v in output['preds'].items()}
-                    counts = output['est_count'][i]
-                    output_i = dict(gt = gt, preds = preds, est_count = counts)
-                    self.metrics.feed(**output_i)
-            else:
-                output['preds'] = {k:v[0] for k,v in output['preds'].items()}
-                output['est_count'] = output['est_count'][0]
-                self.metrics.feed(**output)
+            batch_metrics(self.metrics,batchsize,output)
+            # self.metrics.feed(**output)
         
         self._stored_metrics = self.metrics.copy()
 
@@ -371,7 +367,7 @@ class HerdNetEvaluator(Evaluator):
         try: # batchsize==1
             gt_coords = [p[::-1] for p in targets['points'].cpu().tolist()]
             gt_labels = targets['labels'].cpu().tolist()
-        except Exception as e: # batchsize>1
+        except Exception: # batchsize>1
             gt_coords = [p[::-1] for p in targets['points']]
             gt_labels = targets['labels']
         
