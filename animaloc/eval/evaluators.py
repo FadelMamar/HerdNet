@@ -201,7 +201,7 @@ class Evaluator:
                     wandb.log({'validation_vizuals': fig})
 
             output = self.prepare_feeding(targets, output)
-
+            
             batchsize = images.shape[0]
             if batchsize>1:
                 for i in range(batchsize):
@@ -214,7 +214,7 @@ class Evaluator:
                 output['preds'] = {k:v[0] for k,v in output['preds'].items()}
                 output['est_count'] = output['est_count'][0]
                 iter_metrics.feed(**output)
-            
+                
             iter_metrics.aggregate()
             if log_meters:
                 logger.add_meter('n', sum(iter_metrics.tp) + sum(iter_metrics.fn))
@@ -390,7 +390,8 @@ class HerdNetEvaluator(Evaluator):
             dscores = dscores
         )
         
-        return dict(gt = gt, preds = preds, est_count = counts[0])
+        
+        return dict(gt = gt, preds = preds, est_count = counts)
 
 @EVALUATORS.register()
 class DensityMapEvaluator(Evaluator):
