@@ -238,7 +238,17 @@ class Evaluator:
 
             iter_metrics.flush()
 
-            self.metrics.feed(**output)
+            if batchsize>1:
+                for i in range(batchsize):
+                    gt = {k:v[i] for k,v in output['gt'].items()}
+                    preds = {k:v[i] for k,v in output['preds'].items()}
+                    counts = output['est_count'][i]
+                    output_i = dict(gt = gt, preds = preds, est_count = counts)
+                    self.metrics.feed(**output_i)
+            else:
+                output['preds'] = {k:v[0] for k,v in output['preds'].items()}
+                output['est_count'] = output['est_count'][0]
+                self.metrics.feed(**output)
         
         self._stored_metrics = self.metrics.copy()
 
