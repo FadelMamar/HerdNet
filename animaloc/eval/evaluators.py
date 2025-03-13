@@ -381,12 +381,6 @@ class HerdNetEvaluator(Evaluator):
         lmds = HerdNetLMDS(up=up, **self.lmds_kwargs)
         counts, locs, labels, scores, dscores = lmds(output)
         
-        # preds = dict(
-        #     loc = locs[0],
-        #     labels = labels[0],
-        #     scores = scores[0],
-        #     dscores = dscores[0]
-        # )
         preds = dict(
             loc = locs,
             labels = labels,
