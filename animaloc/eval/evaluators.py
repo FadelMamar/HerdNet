@@ -177,8 +177,8 @@ class Evaluator:
             float
         '''
 
-        def batch_metrics(metric:Metrics,batchsize:int,output:dict):
-            if batchsize>1:
+        def batch_metrics(metric:Metrics,batchsize:int,output:dict)->None:
+            if batchsize>=1:
                 for i in range(batchsize):
                     gt = {k:v[i] for k,v in output['gt'].items()}
                     preds = {k:v[i] for k,v in output['preds'].items()}
@@ -186,9 +186,7 @@ class Evaluator:
                     output_i = dict(gt = gt, preds = preds, est_count = counts)
                     metric.feed(**output_i)
             else:
-                output['preds'] = {k:v[0] for k,v in output['preds'].items()}
-                output['est_count'] = output['est_count'][0]
-                metric.feed(**output)
+                raise NotImplementedError
         
         self.model.eval()
 
