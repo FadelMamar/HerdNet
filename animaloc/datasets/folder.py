@@ -22,7 +22,6 @@ import numpy
 
 from typing import Optional, List, Any, Dict
 
-from ..data.types import BoundingBox
 from ..data.utils import group_by_image
 
 from .register import DATASETS
@@ -57,7 +56,8 @@ class FolderDataset(CSVDataset):
         csv_file: str, 
         root_dir: str, 
         albu_transforms: Optional[list] = None,
-        end_transforms: Optional[list] = None
+        end_transforms: Optional[list] = None,
+        images_paths:list[str]=None
         ) -> None:
         ''' 
         Args:
@@ -71,12 +71,19 @@ class FolderDataset(CSVDataset):
                 tensor and expected target as input and returns a transformed
                 version. These will be applied after albu_transforms. Defaults
                 to None.
+            images_paths (list, optional): list of images to be considered. Overrides root_dir
         '''
 
         super(FolderDataset, self).__init__(csv_file, root_dir, albu_transforms, end_transforms)
 
-        self.folder_images = [i for i in os.listdir(self.root_dir) 
-                                if i.endswith(('.JPG','.jpg','.JPEG','.jpeg'))]
+        if images_paths is None:
+            self.folder_images = [i for i in os.listdir(self.root_dir) 
+                                    if i.endswith(('.JPG','.jpg','.JPEG','.jpeg'))]
+        else:
+            print("Overriding root_dir in FolderDataset, using images_paths")
+            self.folder_images = [i for i in images_paths 
+                                    if i.endswith(('.JPG','.jpg','.JPEG','.jpeg'))]
+            
     
         self._img_names = self.folder_images        
         self.anno_keys = self.data.columns

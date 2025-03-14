@@ -17,7 +17,7 @@ __version__ = "0.2.0"
 
 import PIL
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import ImageDraw, ImageFont
 
 __all__ = ['draw_points', 'draw_boxes', 'draw_text']
 
