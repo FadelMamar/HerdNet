@@ -21,7 +21,6 @@ __license__ = "MIT"
 
 import math
 from os.path import join
-from posixpath import basename
 
 import torch
 from torch import nn

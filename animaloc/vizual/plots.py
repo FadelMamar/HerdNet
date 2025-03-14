@@ -15,14 +15,11 @@ __license__ = "CC BY-NC-SA 4.0"
 __version__ = "0.2.0"
 
 
-import torch
 import matplotlib.pyplot as plt 
 import random
 import itertools
 
 from typing import Optional
-from torchvision.transforms import ToPILImage
-from ..data.transforms import UnNormalize, GaussianMap
 
 __all__ = ['PlotPrecisionRecall']
 

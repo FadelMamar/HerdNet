@@ -22,7 +22,6 @@ import numpy
 
 from typing import Optional, List, Any, Dict
 
-from ..data.types import BoundingBox
 from ..data.utils import group_by_image
 
 from .register import DATASETS
