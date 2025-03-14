@@ -81,7 +81,7 @@ class FolderDataset(CSVDataset):
                                     if i.endswith(('.JPG','.jpg','.JPEG','.jpeg'))]
         else:
             print("Overriding root_dir in FolderDataset, using images_paths")
-            self.folder_images = [os.path.basename(i)  for i in images_paths 
+            self.folder_images = [i for i in images_paths 
                                     if i.endswith(('.JPG','.jpg','.JPEG','.jpeg'))]
             
     
