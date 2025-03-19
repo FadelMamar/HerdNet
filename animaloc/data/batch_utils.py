@@ -36,6 +36,38 @@ def collate_fn(batch):
     batched_images = cat_list(images)
     return batched_images , targets
 
+def val_collate_fn(self, batch: tuple) -> tuple[torch.Tensor, dict]:
+        """collate_fn used to create the validation dataloader
+
+        Args:
+            batch (tuple): (img:torch.Tensor, targets:dict)
+
+        Returns:
+            tuple: (image, target)
+        """
+
+        batched = dict(points=[], labels=[])
+        batch_img = torch.stack([p[0] for p in batch])
+        targets = [p[1] for p in batch]
+        keys = targets[0].keys()
+
+        # get non_empty samples indidces -> set difference
+        non_empty_idx = [i for i, a in enumerate(targets) if len(a["labels"]) > 0]
+        targets_empty = [
+            targets[i] for i in list(set(range(len(batch))) - set(non_empty_idx))
+        ]
+        targets = [targets[i] for i in non_empty_idx]
+
+        # Creating batch
+        for k in keys:
+            batched[k] = []  # initialize to be empty list
+            if k == "points" or k=='labels':
+                batched[k] = [a[k].cpu().tolist() for a in targets]
+                if len(targets_empty) > 0:
+                    batched[k] = batched[k] + [[]] * len(targets_empty)
+        return batch_img, batched
+    
+
 def to_xywh(bbox):
     ''' Bbox from [x_min,y_min,x_max,y_max] to [x,y,width,height] '''
     width = bbox[2] - bbox[0]
